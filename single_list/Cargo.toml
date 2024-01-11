@@ -1,6 +1,5 @@
-workspace = { members = ["single_list"] }
 [package]
-name = "Linked-List"
+name = "single_list"
 version = "0.1.0"
 edition = "2021"
 

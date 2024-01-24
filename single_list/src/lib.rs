@@ -44,8 +44,8 @@ impl<T> List<T> {
 
 impl<T> Drop for List<T> {
     fn drop(&mut self) {
-        let mut cur_node = self.head.take();
-        while let Some(mut node) = cur_node {
+        let mut cur_node = self.head.take();  // Link<T>
+        while let Some(mut node) = cur_node { // Box<T> 类型是一个智能指针，因为它实现了 Deref trait，它允许 Box<T> 值被当作引用对待。当 Box<T> 值离开作用域时，由于 Box<T> 类型 Drop trait 的实现，box 所指向的堆数据也会被清除。
             cur_node = node.next.take();
             // node goes out of scope and calls drop automatically
         }

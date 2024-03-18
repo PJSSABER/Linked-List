@@ -109,13 +109,41 @@ impl<T> List<T> {
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
     
+    /*
+        actually should be
+        fn next<'b>(&'b mut self) -> Option<&'a T> { /* stuff */ }
+    */
     fn next(&mut self) -> Option<Self::Item> {
+        //shared references are also Copy! Because & is copy, Option<&> is also Copy
         self.next.map(|node| {
             self.next = node.next.as_deref().map(|node| node);
             &node.elem
         })
     }
 }
+
+// IterMut
+pub struct IterMut<'a, T> {
+    next: Option<&'a mut Node<T>>,
+}
+
+impl<T> List<T> {
+    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, T> {
+        IterMut {next: self.head.as_deref_mut() }
+    }
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map( |node| {
+            self.next = node.next.as_deref_mut();
+            &mut node.elem
+        })
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -195,4 +223,14 @@ mod tests {
         assert_eq!(iter.next(), Some(&1));
     }
     
+    #[test]
+    fn iter_mut() {
+        let mut list = List::new();
+        list.push(1); list.push(2); list.push(3);
+
+        let mut iter = list.iter_mut();
+        assert_eq!(iter.next(), Some(&mut 3));
+        assert_eq!(iter.next(), Some(&mut 2));
+        assert_eq!(iter.next(), Some(&mut 1));
+    }
 }
